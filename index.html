@@ -83,7 +83,7 @@
 			#cat
 			{
 				position:fixed;
-				left:-20px;
+				right:-20px;
 				bottom:-20px;
 				width:120px;
 				height:120px;
@@ -127,13 +127,13 @@
 						$('#cat').on('mouseenter.zoomCat',function(e){
 							$('#cat').attr('src','catAni.gif');
 							$('#cat').stop();
-							$('#cat').animate({width:180,height:180,left:-30,bottom:-30},200,'easeOutCubic');
+							$('#cat').animate({width:180,height:180,right:-30,bottom:-30},200,'easeOutCubic');
 						});
 
 						$('#cat').on('mouseleave.unzoomCat',function(e){
 							$('#cat').attr('src','cat.gif');
 							$('#cat').stop();
-							$('#cat').animate({width:120,height:120,left:-20,bottom:-20},200,'easeOutCubic');
+							$('#cat').animate({width:120,height:120,right:-20,bottom:-20},200,'easeOutCubic');
 						});
 					});
 
