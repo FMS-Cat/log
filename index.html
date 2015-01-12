@@ -137,8 +137,14 @@
 		<script src="jquery.color.js"></script>
 		<script>
 			$(function(){
-				query(/#(.*)/.exec(location.href)[1]);
-				history.replaceState(/#(.*)/.exec(location.href)[1]);
+				var firstHref=/#.*/.exec(location.href);
+				if(firstHref){
+					query(firstHref[0]);
+					history.replaceState(firstHref[0]);
+				}else{
+					query('');
+					history.replaceState('');
+				}
 
 				$(document).on('mousemove.moveBalloon',function(e){
 					$("#balloonD").animate({left:e.clientX+8},0);
@@ -179,7 +185,7 @@
 
 				$(document).on('click.titleSelect','.title',function(e){
 					time = $(this).attr('time');
-					history.pushState('time/'+time,'','#time/'+time);
+					history.pushState('#time/'+time,'','#time/'+time);
 					loadTime(time);
 				});
 
@@ -195,7 +201,7 @@
 
 				$(document).on('click.tagSelect','.tag',function(e){
 					tag = $(this).html();
-					history.pushState('tag/'+tag,'','#tag/'+tag);
+					history.pushState('#tag/'+tag,'','#tag/'+tag);
 					loadTag(tag);
 				});
 
@@ -250,12 +256,11 @@
 				}
 
 				function query(_i){
+					if(_i == ''){loadPage(0); return;}
 					var a = _i.split('/');
-					console.log(a);
 					switch(a[0]){
-						case '': loadPage(0); break;
-						case 'time': loadTime(a[1]); break;
-						case 'tag': loadTag(a[1]); break;
+						case '#time': loadTime(a[1]); break;
+						case '#tag': loadTag(a[1]); break;
 					}
 				}
 
