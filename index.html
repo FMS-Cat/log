@@ -7,6 +7,7 @@
 		<style type="text/css">
 			*
 			{
+				font-family:"Helvetica Neue","Arial",sans-serif;
 				font-size:14px;
 				line-height:1.5;
 				overflow-x:hidden;
@@ -16,6 +17,14 @@
 			{
 				background:#222;
 				color:#fff;
+			}
+
+			.logs
+			{
+				position:absolute;
+				width:100%;
+				top:48px;
+				margin-bottom:16px;
 			}
 
 			.log
@@ -28,14 +37,15 @@
 			.time
 			{
 				margin:4px 12px;
-				color:#ccc;
+				color:#999;
 			}
 
 			.title
 			{
-				margin:8px;
-				color:#fff;
+				margin:-8px 12px;
+				color:#ccc;
 				font-size:32px;
+				cursor:pointer;
 			}
 
 			.tags
@@ -48,19 +58,19 @@
 				margin:4px;
 				padding:4px;
 				background:#555;
-				cursor:pointer;
 				font-size:10px;
 				border-radius:2px;
+				cursor:pointer;
 			}
 
 			.text
 			{
-				margin:12px 32px 12px 32px;
+				margin:20px 32px 12px 32px;
 			}
 
 			.balloony
 			{
-				padding:2px;
+				padding:1px;
 				background:#624;
 				border:1px solid #936;
 				border-radius:2px;
@@ -80,6 +90,30 @@
 				white-space:nowrap;
 			}
 
+			#head
+			{
+				font-size:32px;
+				position:fixed;
+				right:0px;
+				top:0px;
+				width:100%;
+				background:#444;
+				color:#fff;
+				z-index:2;
+			}
+
+			#foot
+			{
+				font-size:12px;
+				text-align:center;
+				position:fixed;
+				right:0px;
+				bottom:0px;
+				width:100%;
+				background:#444;
+				z-index:2;
+			}
+
 			#cat
 			{
 				position:fixed;
@@ -89,80 +123,181 @@
 				height:120px;
 				border-radius:50%;
 				transform:rotate(-10deg);
+				z-index:3;
 			}
 		</style>
 	</head>
 	<body>
-		<div id="logs"></div>
+		<div id="head">FMS_Cat.log</div>
 		<div id="balloonD"><div id="balloon"></div></div>
+		<div id="foot">2015 FMS_Cat</div>
 		<a href="https://twitter.com/FMS_Cat" target="_blank"><image src="cat.gif" id="cat"></image></a>
 		<script src="jquery.js"></script>
 		<script src="jquery.easing.js"></script>
+		<script src="jquery.color.js"></script>
 		<script>
 			$(function(){
-				$.getJSON('logs.json',function(logs){
-					logs.sort(function(a,b){
-						return b.time - a.time;
-					});
-					$.each(logs,function(i,log){
-						var logDiv = $('<div class="log">');
-						$(logDiv).append('<div class="time">'+new Date(log.time)+'</div>');
-						$(logDiv).append('<div class="title">'+log.title+'</div>');
-						var tagsDiv = $('<div class="tags"></div>');
-						$.each(log.tags,function(i,tag){
-							$(tagsDiv).append('<span class="tag">'+tag+'</span>');
-						});
-						$(logDiv).append(tagsDiv);
-						$.get('log/'+log.time+'.html',function(html){
-							$(logDiv).append($('<div class="text">').html(html));
-							addEvent();
-						});
-						$('#logs').append(logDiv);
+				query(/#(.*)/.exec(location.href)[1]);
+				history.replaceState(/#(.*)/.exec(location.href)[1]);
 
-						$(document).on('mousemove.moveBalloon',function(e){
-							$("#balloonD").animate({left:e.clientX+8},0);
-							$("#balloonD").animate({top:e.clientY+8},0);
-						});
-
-						$('#cat').on('mouseenter.zoomCat',function(e){
-							$('#cat').attr('src','catAni.gif');
-							$('#cat').stop();
-							$('#cat').animate({width:180,height:180,right:-30,bottom:-30},200,'easeOutCubic');
-						});
-
-						$('#cat').on('mouseleave.unzoomCat',function(e){
-							$('#cat').attr('src','cat.gif');
-							$('#cat').stop();
-							$('#cat').animate({width:120,height:120,right:-20,bottom:-20},200,'easeOutCubic');
-						});
-					});
-
-					function addEvent(){
-						$(".tag").on('click.tagSelect',function(e){
-							console.log($(this).html());
-						});
-
-						$(".tag").on('mouseenter.tagBgOn',function(e){
-							$(this).css({background:"#666"});
-						});
-
-						$(".tag").on('mouseleave.tagBgOff',function(e){
-							$(this).css({background:"#555"});
-						});
-
-						$('[balloon]').on('mouseenter.showBalloon',function(e){
-							$('#balloon').html($(this).attr('balloon'));
-							$('#balloon').stop();
-							$('#balloon').fadeTo(100,.8);
-						});
-
-						$('[balloon]').on('mouseleave.hideBalloon',function(e){
-							$('#balloon').stop();
-							$('#balloon').fadeTo(100,0);
-						});
-					}
-					addEvent();
+				$(document).on('mousemove.moveBalloon',function(e){
+					$("#balloonD").animate({left:e.clientX+8},0);
+					$("#balloonD").animate({top:e.clientY+8},0);
 				});
+
+				$('#cat').on('mouseenter.zoomCat',function(e){
+					$('#cat').attr('src','catAni.gif');
+					$('#cat').stop();
+					$('#cat').animate({width:180,height:180,right:-30,bottom:-30},200,'easeOutCubic');
+				});
+
+				$('#cat').on('mouseleave.unzoomCat',function(e){
+					$('#cat').attr('src','cat.gif');
+					$('#cat').stop();
+					$('#cat').animate({width:120,height:120,right:-20,bottom:-20},200,'easeOutCubic');
+				});
+
+				$(window).on('popstate',function(e){
+					query(e.originalEvent.state);
+				});
+
+				$(document).on('click.headSelect','#head',function(e){
+					time = $(this).attr('time');
+					history.pushState('','','/');
+					loadPage(0);
+				});
+
+				$(document).on('mouseenter.headBgOn','#head',function(e){
+					$(this).stop();
+					$(this).animate({backgroundColor:"#666"},200);
+				});
+
+				$(document).on('mouseleave.headBgOff','#head',function(e){
+					$(this).stop();
+					$(this).animate({backgroundColor:"#444"},200);
+				});
+
+				$(document).on('click.titleSelect','.title',function(e){
+					time = $(this).attr('time');
+					history.pushState('time/'+time,'','#time/'+time);
+					loadTime(time);
+				});
+
+				$(document).on('mouseenter.titleColorOn','.title',function(e){
+					$(this).stop();
+					$(this).animate({color:"#fff"},200);
+				});
+
+				$(document).on('mouseleave.titleColorOff','.title',function(e){
+					$(this).stop();
+					$(this).animate({color:"#ccc"},200);
+				});
+
+				$(document).on('click.tagSelect','.tag',function(e){
+					tag = $(this).html();
+					history.pushState('tag/'+tag,'','#tag/'+tag);
+					loadTag(tag);
+				});
+
+				$(document).on('mouseenter.tagBgOn','.tag',function(e){
+					$(this).stop();
+					$(this).animate({backgroundColor:"#777"},200);
+				});
+
+				$(document).on('mouseleave.tagBgOff','.tag',function(e){
+					$(this).stop();
+					$(this).animate({backgroundColor:"#555"},200);
+				});
+
+				$(document).on('mouseenter.showBalloon','[balloon]',function(e){
+					$('#balloon').html($(this).attr('balloon'));
+					$('#balloon').stop();
+					$('#balloon').fadeTo(100,.8);
+				});
+
+				$(document).on('mouseleave.hideBalloon','[balloon]',function(e){
+					$('#balloon').stop();
+					$('#balloon').fadeTo(100,0);
+				});
+
+				function appendLog(_log,_logsDiv){
+					var logDiv = $('<div class="log">');
+					$(logDiv).append('<div class="time">'+new Date(_log.time)+'</div>');
+					$(logDiv).append('<div class="title" time="'+_log.time+'">'+_log.title+'</div>');
+					var tagsDiv = $('<div class="tags"></div>');
+					$.each(_log.tags,function(_i,_tag){
+						$(tagsDiv).append($('<span class="tag">').html(_tag));
+					});
+					$(logDiv).append(tagsDiv);
+					$.get('log/'+_log.time+'.html',function(html){
+						$(logDiv).append($('<div class="text">').html(html));
+					});
+					$(_logsDiv).append(logDiv);
+				}
+
+				function newPage(){
+					$('.logs').addClass('logsOld');
+					$('.logs').removeClass('logsNew');
+					var logsDiv = $('<div class="logs logsNew">');
+					logsDiv.css({left:-$(window).width()});
+					$('body').append(logsDiv);
+					$('.logsOld').animate({left:$(window).width()},300,'easeOutCubic',function(){
+						$('.logsOld').remove();
+					});
+					$('.logsNew').animate({left:0},300,'easeOutCubic');
+					$('html,body').animate({scrollTop:0},300,'easeOutCubic');
+					return logsDiv;
+				}
+
+				function query(_i){
+					var a = _i.split('/');
+					console.log(a);
+					switch(a[0]){
+						case '': loadPage(0); break;
+						case 'time': loadTime(a[1]); break;
+						case 'tag': loadTag(a[1]); break;
+					}
+				}
+
+				function loadPage(_page){
+					logsDiv = newPage();
+					$.getJSON('logs.json',function(_logs){
+						_logs.sort(function(_a,_b){
+							return _b.time - _a.time;
+						});
+						$.each(_logs,function(_i,_log){
+							if(5*_page<=_i&&_i<5+5*_page){
+								appendLog(_log,logsDiv);
+							}
+						});
+					});
+				}
+
+				function loadTime(_time){
+					logsDiv = newPage();
+					$.getJSON('logs.json',function(_logs){
+						$.each(_logs,function(_i,_log){
+							if(_log.time == _time){
+								appendLog(_log,logsDiv);
+								return false; // break
+							}
+						});
+					});
+				}
+
+				function loadTag(_tag){
+					logsDiv = newPage();
+					$.getJSON('logs.json',function(_logs){
+						_logs.sort(function(_a,_b){
+							return _b.time - _a.time;
+						});
+						$.each(_logs,function(_i,_log){
+							if($.inArray(_tag,_log.tags) != -1){
+								appendLog(_log,logsDiv);
+							}
+						});
+					});
+				}
 			});
 		</script>
 	</body>

@@ -8,12 +8,12 @@
 	{
 		"time":1421058022819,
 		"title":"Balloonの実験",
-		"tags":["HTML","CSS","JavaScript"]
+		"tags":["HTML","CSS","JavaScript","experiment"]
 	},
 
 	{
 		"time":1421053545098,
 		"title":"JSON+jQueryでブログをかいてみたい",
-		"tags":["HTML","CSS","JavaScript","JSON","jQuery"]
+		"tags":["HTML","CSS","JavaScript","JSON","jQuery","experiment"]
 	}
 ]
