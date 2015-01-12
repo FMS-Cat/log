@@ -169,7 +169,7 @@
 
 				$(document).on('click.headSelect','#head',function(e){
 					time = $(this).attr('time');
-					history.pushState('','','');
+					history.pushState('','','http://fms-cat.github.io/log/');
 					loadPage(0);
 				});
 
@@ -259,6 +259,7 @@
 					if(_i == ''){loadPage(0); return;}
 					var a = _i.split('/');
 					switch(a[0]){
+						case '#page': loadPage(a[1]); break;
 						case '#time': loadTime(a[1]); break;
 						case '#tag': loadTag(a[1]); break;
 					}
