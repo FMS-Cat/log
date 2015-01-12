@@ -82,7 +82,7 @@
 
 			.tags
 			{
-				margin:8px;
+				margin:0px 8px;
 			}
 
 			.tag
@@ -97,7 +97,7 @@
 
 			.text
 			{
-				margin:20px 32px 12px 32px;
+				margin:12px 32px 12px 32px;
 			}
 
 			.balloony
@@ -262,9 +262,10 @@
 
 				function appendLog(_log,_logsDiv){
 					var logDiv = $('<div class="log">');
-					$(logDiv).append('<div class="time">'+new Date(_log.time)+'</div>');
-					$(logDiv).append('<div class="title" time="'+_log.time+'">'+_log.title+'</div>');
-					var tagsDiv = $('<div class="tags"></div>');
+					$(logDiv).append($('<span class="time">').html(new Date(_log.time)));
+					$(logDiv).append('<br>');
+					$(logDiv).append($('<span class="title" time="'+_log.time+'">').html(_log.title));
+					var tagsDiv = $('<div class="tags">');
 					$.each(_log.tags,function(_i,_tag){
 						$(tagsDiv).append($('<span class="tag">').html(_tag));
 					});
