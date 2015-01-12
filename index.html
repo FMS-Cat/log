@@ -8,7 +8,6 @@
 			*
 			{
 				font-family:"Helvetica Neue","Arial",sans-serif;
-				font-size:14px;
 				line-height:1.5;
 				overflow-x:hidden;
 			}
@@ -153,6 +152,7 @@
 		<script src="jquery.js"></script>
 		<script src="jquery.easing.js"></script>
 		<script src="jquery.color.js"></script>
+		<script src="marked.js"></script>
 		<script>
 			$(function(){
 				var firstHref=/#.*/.exec(location.href);
@@ -244,7 +244,7 @@
 					});
 					$(logDiv).append(tagsDiv);
 					$.get('log/'+_log.time+'.html',function(html){
-						$(logDiv).append($('<div class="text">').html(html));
+						$(logDiv).append($('<div class="text">').html(marked(html)));
 					});
 					$(_logsDiv).append(logDiv);
 				}
