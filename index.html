@@ -4,10 +4,12 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>FMS_Cat.log</title>
+		<link href='http://fonts.googleapis.com/earlyaccess/notosansjapanese.css' rel='stylesheet' type='text/css'>
+		<link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
 		<style type="text/css">
 			*
 			{
-				font-family:"Helvetica Neue","Arial",sans-serif;
+				font-family:'Noto Sans Japanese',sans-serif;
 				line-height:1.5;
 				overflow-x:hidden;
 			}
@@ -28,6 +30,25 @@
 			{
 				text-decoration:underline;
 				color:#f93;
+			}
+
+			ul
+			{
+				list-style-type:square;
+			}
+
+			li
+			{
+				overflow-x:visible;
+			}
+
+			code
+			{
+				font-family:'Ubuntu Mono',monospace;
+				padding:1px;
+				background:#444;
+				border:1px solid #666;
+				border-radius:2px;
 			}
 
 			.logs
@@ -155,6 +176,11 @@
 		<script src="marked.js"></script>
 		<script>
 			$(function(){
+				marked.setOptions({
+					gfm:true,
+					breaks:true,
+				});
+
 				var firstHref=/#.*/.exec(location.href);
 				if(firstHref){
 					query(firstHref[0]);
