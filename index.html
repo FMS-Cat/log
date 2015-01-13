@@ -26,12 +26,6 @@
 				color:#fc9;
 			}
 
-			a:hover
-			{
-				text-decoration:underline;
-				color:#f93;
-			}
-
 			ul
 			{
 				list-style-type:square;
@@ -134,6 +128,16 @@
 				background:#444;
 				color:#fff;
 				z-index:2;
+				cursor:pointer;
+			}
+
+			#headTitle
+			{
+				opacity:.8;
+				font-size:32px;
+				z-index:2;
+				padding:8px;
+				overflow:visible;
 			}
 
 			#foot
@@ -162,7 +166,7 @@
 		</style>
 	</head>
 	<body>
-		<div id="head">FMS_Cat.log</div>
+		<div id="head"><span id="headTitle">FMS_Cat.log</span></div>
 		<div id="balloonD"><div id="balloon"></div></div>
 		<div id="foot">
 			<a href="http://fms-cat.github.io/" target="_blank">Homepage</a> -
@@ -204,18 +208,26 @@
 					$('#cat').stop().animate({width:120,height:120,right:-20,bottom:-20},200,'easeOutCubic');
 				});
 
-				$(document).on('click.headSelect','#head',function(e){
+				$(document).on('mouseenter.aColorOn','a',function(e){
+					$(this).stop().animate({color:"#f93"},100);
+				});
+
+				$(document).on('mouseleave.aColorOff','a',function(e){
+					$(this).stop().animate({color:"#fc9"},100);
+				});
+
+				$(document).on('click.headTitleSelect','#headTitle',function(e){
 					time = $(this).attr('time');
 					history.pushState('','','http://fms-cat.github.io/log/');
 					loadPage(0);
 				});
 
-				$(document).on('mouseenter.headBgOn','#head',function(e){
-					$(this).stop().animate({backgroundColor:"#666"},200);
+				$(document).on('mouseenter.headTitleColorOn','#headTitle',function(e){
+					$(this).stop().fadeTo(100,1);
 				});
 
-				$(document).on('mouseleave.headBgOff','#head',function(e){
-					$(this).stop().animate({backgroundColor:"#444"},200);
+				$(document).on('mouseleave.headTitleColorOff','#headTitle',function(e){
+					$(this).stop().fadeTo(100,.8);
 				});
 
 				$(document).on('click.titleSelect','.title',function(e){
@@ -225,11 +237,11 @@
 				});
 
 				$(document).on('mouseenter.titleColorOn','.title',function(e){
-					$(this).stop().animate({color:"#fff"},200);
+					$(this).stop().animate({color:"#fff"},100);
 				});
 
 				$(document).on('mouseleave.titleColorOff','.title',function(e){
-					$(this).stop().animate({color:"#ccc"},200);
+					$(this).stop().animate({color:"#ccc"},100);
 				});
 
 				$(document).on('click.tagSelect','.tag',function(e){
@@ -239,11 +251,19 @@
 				});
 
 				$(document).on('mouseenter.tagBgOn','.tag',function(e){
-					$(this).stop().animate({backgroundColor:"#777"},200);
+					$(this).stop().animate({backgroundColor:"#777"},100);
 				});
 
 				$(document).on('mouseleave.tagBgOff','.tag',function(e){
-					$(this).stop().animate({backgroundColor:"#555"},200);
+					$(this).stop().animate({backgroundColor:"#555"},100);
+				});
+
+				$(document).on('mouseenter.balloonyBgOn','.balloony',function(e){
+					$(this).stop().animate({backgroundColor:"#936"},100);
+				});
+
+				$(document).on('mouseleave.balloonyBgOff','.balloony',function(e){
+					$(this).stop().animate({backgroundColor:"#624"},100);
 				});
 
 				$(document).on('mouseenter.showBalloon','[balloon]',function(e){
