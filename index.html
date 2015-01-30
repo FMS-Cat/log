@@ -3,19 +3,19 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=0.5,minimum-scale=0.5,maximum-scale=2.0,user-scalable=yes">
 		<title>FMS_Cat.log</title>
-		<link href='http://fonts.googleapis.com/earlyaccess/notosansjapanese.css' rel='stylesheet' type='text/css'>
 		<link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
 		<style type="text/css">
 			*
 			{
-				font-family:'Noto Sans Japanese',sans-serif;
 				line-height:1.5;
 				overflow-x:hidden;
 			}
 
 			body
 			{
+				margin:0;
 				background:#222;
 				color:#fff;
 			}
@@ -50,7 +50,7 @@
 				position:absolute;
 				width:100%;
 				top:48px;
-				margin-bottom:16px;
+				margin-bottom:20px;
 			}
 
 			.log
@@ -91,7 +91,7 @@
 
 			.text
 			{
-				margin:12px 32px 12px 32px;
+				margin:2px 32px -12px 32px;
 			}
 
 			.balloony
@@ -118,6 +118,16 @@
 				z-index:4;
 			}
 
+			#prevNext
+			{
+				color:#fff;
+				font:700 96px/1.2 'Helvetica Neue';
+				line-height:1;
+				letter-spacing:-9px;
+				margin:-35px 0 -40px 0;
+				text-align:center;
+			}
+
 			#head
 			{
 				font-size:32px;
@@ -133,7 +143,9 @@
 
 			#headTitle
 			{
-				opacity:.8;
+				font:100 96px/1.2 'Helvetica Neue';
+				line-height:1;
+				letter-spacing:8px;
 				font-size:32px;
 				z-index:2;
 				padding:8px;
@@ -160,7 +172,7 @@
 				width:120px;
 				height:120px;
 				border-radius:50%;
-				transform:rotate(-10deg);
+				transform:rotate(-6deg);
 				z-index:3;
 			}
 		</style>
@@ -174,8 +186,10 @@
 			2015 FMS_Cat
 		</div>
 		<a href="https://twitter.com/FMS_Cat" target="_blank"><image src="cat.gif" id="cat"></image></a>
+		<image src="catAni.gif" id="catPreload" style="display:none">
 		<script src="jquery.js"></script>
 		<script src="jquery.easing.js"></script>
+		<script src="jquery.transit.js"></script>
 		<script src="jquery.color.js"></script>
 		<script src="marked.js"></script>
 		<script>
@@ -185,17 +199,19 @@
 					breaks:true,
 				});
 
-				var firstHref=/#.*/.exec(location.href);
+				var firstHref = /#(.*)/.exec(location.href);
 				if(firstHref){
-					query(firstHref[0]);
-					history.replaceState(firstHref[0]);
+					var a = firstHref[1].split('/');
+					console.log(a);
+					jumpFirst(a);
+					history.replaceState(a);
 				}else{
-					query('');
-					history.replaceState('');
+					jumpFirst([]);
+					history.replaceState([]);
 				}
 
 				$(window).on('popstate',function(e){
-					query(e.originalEvent.state);
+					jumpPop(e.originalEvent.state);
 				});
 
 				$(document).on('mouseenter.zoomCat','#cat',function(e){
@@ -218,8 +234,7 @@
 
 				$(document).on('click.headTitleSelect','#headTitle',function(e){
 					time = $(this).attr('time');
-					history.pushState('','','http://fms-cat.github.io/log/');
-					loadPage(0);
+					jump([]);
 				});
 
 				$(document).on('mouseenter.headTitleColorOn','#headTitle',function(e){
@@ -230,10 +245,47 @@
 					$(this).stop().fadeTo(100,.8);
 				});
 
+				$(document).on('click.nextSelect','#next',function(e){
+					if(query.length == 0){
+						jump([1]);
+					}else if(!isNaN(Number(query[0]))){
+						query[0] = Number(query[0])+1;
+						jump(query);
+					}else{
+						query[2] = Number(query[2])+1;
+						jump(query);
+					}
+				});
+
+				$(document).on('mouseenter.nextColorOn','#next',function(e){
+					$(this).stop().fadeTo(100,1);
+				});
+
+				$(document).on('mouseleave.nextColorOff','#next',function(e){
+					$(this).stop().fadeTo(100,.7);
+				});
+
+				$(document).on('click.prevSelect','#prev',function(e){
+					if(!isNaN(Number(query[0]))){
+						query[0] = Number(query[0])-1;
+						jump(query);
+					}else{
+						query[2] = Number(query[2])-1;
+						jump(query);
+					}
+				});
+
+				$(document).on('mouseenter.prevColorOn','#prev',function(e){
+					$(this).stop().fadeTo(100,1);
+				});
+
+				$(document).on('mouseleave.prevColorOff','#prev',function(e){
+					$(this).stop().fadeTo(100,.7);
+				});
+
 				$(document).on('click.titleSelect','.title',function(e){
 					time = $(this).attr('time');
-					history.pushState('#time/'+time,'','#time/'+time);
-					loadTime(time);
+					jump(['time',time]);
 				});
 
 				$(document).on('mouseenter.titleColorOn','.title',function(e){
@@ -246,8 +298,7 @@
 
 				$(document).on('click.tagSelect','.tag',function(e){
 					tag = $(this).html();
-					history.pushState('#tag/'+tag,'','#tag/'+tag);
-					loadTag(tag);
+					jump(['tag',tag,0]);
 				});
 
 				$(document).on('mouseenter.tagBgOn','.tag',function(e){
@@ -296,41 +347,98 @@
 					$(_logsDiv).append(logDiv);
 				}
 
+				function createPrevNext(_prev,_next,_div){
+					var div = $('<div>');
+					div.attr('id','prevNext');
+					(function(){
+						var span = $('<span>');
+						span.html('Prev');
+						span.css({opacity:.2});
+						if(_prev){
+							span.attr('id','prev');
+							span.css({opacity:.7});
+						}
+						div.append(span);
+					}());
+					(function(){
+						var span = $('<span>');
+						span.html(' | ');
+						span.css({opacity:.7});
+						div.append(span);
+					}());
+					(function(){
+						var span = $('<span>');
+						span.html('Next');
+						span.css({opacity:.2});
+						if(_next){
+							span.attr('id','next');
+							span.css({opacity:.7});
+						}
+						div.append(span);
+					}());
+					_div.append(div);
+				}
+
 				function newPage(){
 					$('.logs').addClass('logsOld');
 					$('.logs').removeClass('logsNew');
 					var logsDiv = $('<div class="logs logsNew">');
-					logsDiv.css({left:-$(window).width()});
+					logsDiv.css({top:58,opacity:0});
 					$('body').append(logsDiv);
-					$('.logsOld').animate({left:$(window).width()},300,'easeOutCubic',function(){
+					$('.log').stop().transition({scale:.95,opacity:0},300,'easeOutCubic');
+					$('#prevNext').stop().transition({scale:.95,opacity:0},300,'easeOutCubic',function(){
 						$('.logsOld').remove();
 					});
-					$('.logsNew').animate({left:0},300,'easeOutCubic');
-					$('html,body').animate({scrollTop:0},300,'easeOutCubic');
+					$('.logsNew').delay(300).transition({top:48,opacity:1},400,'easeOutCubic');
 					return logsDiv;
 				}
 
-				function query(_i){
-					if(_i == ''){loadPage(0); return;}
-					var a = _i.split('/');
+				function jumpFirst(_i){
+					var a = query = _i;
+					if(_i.length == 0){loadAll(0); return;}
+					if(!_i[1]){
+						if(!isNaN(Number(query[0]))){
+							loadAll(a[0]); return;
+						}else{
+							loadAll(0); return;
+						}
+					}
+					var page = 0;
+					if(a[2]){page = a[2];}
 					switch(a[0]){
-						case '#page': loadPage(a[1]); break;
-						case '#time': loadTime(a[1]); break;
-						case '#tag': loadTag(a[1]); break;
+						case 'time': loadTime(a[1],page); break;
+						case 'tag': loadTag(a[1],page); break;
 					}
 				}
 
-				function loadPage(_page){
+				function jump(_i){
+					jumpFirst(_i);
+					$('body').delay(300).animate({scrollTop:0},0);
+					history.pushState(_i,'','#'+_i.join('/'));
+				}
+
+				function jumpPop(_i){
+					jumpFirst(_i);
+					history.pushState(_i,'','#'+_i.join('/'));
+				}
+
+				function loadAll(_page){
 					logsDiv = newPage();
 					$.getJSON('logs.json',function(_logs){
 						_logs.sort(function(_a,_b){
 							return _b.time - _a.time;
 						});
+						var count = 0;
+						var prevAvail = _page==0?false:true;
+						var nextAvail = false;
 						$.each(_logs,function(_i,_log){
-							if(5*_page<=_i&&_i<5+5*_page){
+							if(count == (_page+1)*10){nextAvail = true; return false;} // break
+							count ++;
+							if(_page*10 < count){
 								appendLog(_log,logsDiv);
 							}
 						});
+						createPrevNext(prevAvail,nextAvail,logsDiv);
 					});
 				}
 
@@ -346,17 +454,25 @@
 					});
 				}
 
-				function loadTag(_tag){
+				function loadTag(_tag,_page){
 					logsDiv = newPage();
 					$.getJSON('logs.json',function(_logs){
 						_logs.sort(function(_a,_b){
 							return _b.time - _a.time;
 						});
+						var count = 0;
+						var prevAvail = _page==0?false:true;
+						var nextAvail = false;
 						$.each(_logs,function(_i,_log){
 							if($.inArray(_tag,_log.tags) != -1){
-								appendLog(_log,logsDiv);
+								if(count == (_page+1)*10){nextAvail = true; return false;} // break
+								count ++;
+								if(_page*10 < count){
+									appendLog(_log,logsDiv);
+								}
 							}
 						});
+						createPrevNext(prevAvail,nextAvail,logsDiv);
 					});
 				}
 			});
