@@ -222,7 +222,6 @@
 				var firstHref = /#(.*)/.exec(location.href);
 				if(firstHref){
 					var a = firstHref[1].split('/');
-					console.log(a);
 					jumpFirst(a);
 					history.replaceState(a);
 				}else{
